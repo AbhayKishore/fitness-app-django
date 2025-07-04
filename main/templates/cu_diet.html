@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer - Diet Planner</title>
+    <link href="https://cdn.prod.website-files.com/67965768eaf7bb15225ae478/67965768eaf7bb15225ae607_Favcon.png" rel="shortcut icon" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #203492;
+            --primary-light: #3a4ca8;
+            --secondary: #28a745;
+            --accent: #ff6b6b;
+            --light-bg: #f8faff;
+            --dark-text: #2d3748;
+            --light-text: #718096;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+
+        .sidebar {
+            width: 72px;
+            height: 100vh;
+            background-color: var(--white);
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            padding-top: 12px;
+            transition: var(--transition);
+            overflow-y: auto;
+            box-shadow: var(--shadow-sm);
+            z-index: 1000;
+        }
+
+        .sidebar.expanded {
+            width: 240px;
+            padding-left: 12px;
+        }
+
+        .sidebar-item {
+            width: calc(100% - 24px);
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 4px 12px;
+            text-decoration: none;
+            color: var(--dark-text);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .sidebar-item:hover {
+            background-color: rgba(32, 52, 146, 0.1);
+        }
+
+        .sidebar-item.active {
+            background-color: rgba(32, 52, 146, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .sidebar-item.active .sidebar-icon {
+            color: var(--primary);
+        }
+
+        .sidebar-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+            margin-right: 24px;
+            flex-shrink: 0;
+            color: var(--light-text);
+            transition: var(--transition);
+        }
+
+        .sidebar-text {
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .sidebar.expanded .sidebar-text {
+            display: inline-block;
+        }
+
+        .menu-toggle {
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            color: var(--dark-text);
+            border-radius: 8px;
+            margin: 0 12px 12px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+
+        .menu-toggle:hover {
+            background-color: rgba(32, 52, 146, 0.1);
+        }
+
+        .menu-toggle .sidebar-icon {
+            margin-right: 0;
+        }
+
+        .sidebar.expanded .menu-toggle .sidebar-icon {
+            margin-right: 24px;
+        }
+
+        .main-content {
+            margin-left: 72px;
+            flex-grow: 1;
+            transition: var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .main-content.expanded {
+            margin-left: 240px;
+        }
+
+        .navbar {
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .nav-link {
+            color: var(--dark-text);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            margin: 0 0.2rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--white);
+            background-color: var(--primary);
+        }
+
+        .nav-link.logout {
+            color: var(--accent);
+            background-color: rgba(255, 107, 107, 0.1);
+        }
+
+        .nav-link.logout:hover {
+            color: var(--white);
+            background-color: var(--accent);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            flex-grow: 1;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        h3 {
+            color: var(--primary);
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .diet-plan, .food-form {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .diet-plan p {
+            font-size: 1.1em;
+            margin: 10px 0;
+            color: var(--light-text);
+        }
+
+        .create-plan-message {
+            text-align: center;
+            color: var(--accent);
+            font-size: 1.2em;
+            margin-top: 20px;
+        }
+
+        .create-plan-message a {
+            color: var(--secondary);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .create-plan-message a:hover {
+            text-decoration: underline;
+        }
+
+        .food-form input {
+            margin-right: 10px;
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 6px;
+            padding: 8px 12px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 500;
+            transition: var(--transition);
+            cursor: pointer;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+            transform: translateY(-1px);
+        }
+
+        .btn-success {
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+
+        .btn-success:hover {
+            background-color: #218838;
+            transform: translateY(-1px);
+        }
+
+        #loading {
+            display: none;
+            text-align: center;
+            margin-top: 10px;
+        }
+
+        #foodResult {
+            margin-top: 10px;
+            font-weight: 500;
+        }
+
+        .text-success {
+            color: var(--secondary) !important;
+        }
+
+        .text-danger {
+            color: var(--accent) !important;
+        }
+
+        .table {
+            width: 100%;
+            margin-bottom: 1rem;
+            color: var(--dark-text);
+            border-collapse: collapse;
+        }
+
+        .table th {
+            background-color: rgba(32, 52, 146, 0.05);
+            color: var(--primary);
+            font-weight: 600;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .table td {
+            padding: 12px;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .form-control {
+            border: 1px solid rgba(0,0,0,0.1);
+            border-radius: 6px;
+            padding: 8px 12px;
+            transition: var(--transition);
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.2rem rgba(32, 52, 146, 0.25);
+        }
+
+        .table-container {
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 15px;
+            }
+
+            .diet-plan, .food-form {
+                padding: 15px 0;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .main-content {
+                margin-left: 0;
+            }
+
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1050;
+            }
+
+            .sidebar.expanded {
+                transform: translateX(0);
+                width: 240px;
+            }
+
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% csrf_token %}
+
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars sidebar-icon"></i>
+            <span class="sidebar-text">Menu</span>
+        </div>
+
+        <a href="/Cust/Trainer_Cat" class="sidebar-item">
+            <i class="fas fa-medal sidebar-icon"></i>
+            <span class="sidebar-text">Trainer Categories</span>
+        </a>
+
+        <a href="/Cust/Trainer" class="sidebar-item">
+            <i class="fas fa-user-tie sidebar-icon"></i>
+            <span class="sidebar-text">Trainers</span>
+        </a>
+
+        <a href="/Cust/Exercise" class="sidebar-item">
+            <i class="fas fa-running sidebar-icon"></i>
+            <span class="sidebar-text">Exercise Plans</span>
+        </a>
+
+        <a href="/Cust/Session" class="sidebar-item">
+            <i class="fas fa-calendar-check sidebar-icon"></i>
+            <span class="sidebar-text">Sessions</span>
+        </a>
+
+        <a href="/Cust/Customer" class="sidebar-item">
+            <i class="fas fa-users sidebar-icon"></i>
+            <span class="sidebar-text">Profile</span>
+        </a>
+
+        <a href="/Cust/Assessment" class="sidebar-item">
+            <i class="fas fa-heartbeat sidebar-icon"></i>
+            <span class="sidebar-text">Fitness Assessment</span>
+        </a>
+
+        <a href="/Cust/Booking" class="sidebar-item">
+            <i class="fas fa-calendar-alt sidebar-icon"></i>
+            <span class="sidebar-text">Bookings</span>
+        </a>
+
+        <a href="/Cust/Records" class="sidebar-item">
+            <i class="fas fa-chart-line sidebar-icon"></i>
+            <span class="sidebar-text">Fitness Records</span>
+        </a>
+
+        <a href="/Cust/Analytics" class="sidebar-item">
+            <i class="fas fa-chart-pie sidebar-icon"></i>
+            <span class="sidebar-text">Analytics</span>
+        </a>
+
+        <a href="/Cust/CU_Bills" class="sidebar-item">
+            <i class="fas fa-file-invoice-dollar sidebar-icon"></i>
+            <span class="sidebar-text">Past Bills</span>
+        </a>
+
+        <a href="/Cust/Diet" class="sidebar-item active">
+            <i class="fas fa-utensils sidebar-icon"></i>
+            <span class="sidebar-text">Diet</span>
+        </a>
+    </div>
+
+    <div class="main-content" id="mainContent">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <a class="navbar-brand" href="/Cust/Dashboard">
+                <i class="fas fa-dumbbell"></i>
+                Virtual Fitness
+            </a>
+        </nav>
+
+        <div class="container">
+            <h1>Diet Planner for {{ customer.customer_name }}</h1>
+
+            {% if show_create_plan_message %}
+                <div class="create-plan-message">
+                    Create Workout plan and set goal based on new assessment in <a href="/Cust/Exercise">Exercise</a> page
+                </div>
+            {% else %}
+                <div class="food-form">
+                    <h3>Add Food Item</h3>
+                    <form id="foodForm">
+                        <input type="text" id="foodName" class="form-control d-inline-block w-50" placeholder="Chicken Breast" required>
+                        <input type="text" id="foodQuantity" class="form-control d-inline-block w-25" placeholder="Quantity" required>
+                        <button type="submit" class="btn btn-primary">Get Nutrients</button>
+                    </form>
+                    <div id="loading">
+                        <div class="spinner-border text-primary" role="status"></div>
+                    </div>
+                    <div id="foodResult" class="text-success"></div>
+                </div>
+
+                <form method="POST" class="diet-plan" id="intakeForm">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="submit_intake">
+                    <h3>Your Personalized Diet Plan</h3>
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Nutrient</th>
+                                <th>Target</th>
+                                <th>Consumed</th>
+                                <th>Remaining</th>
+                                <th>Add Today's Intake</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for nutrient in nutrients %}
+                            <tr id="row_{{ nutrient.name }}">
+                                <td><strong>{{ nutrient.label }}</strong></td>
+                                <td id="target_{{ nutrient.name }}">{{ nutrient.target }}</td>
+                                <td id="actual_{{ nutrient.name }}">{{ nutrient.actual }}</td>
+                                <td id="remaining_{{ nutrient.name }}">{{ nutrient.remaining }}</td>
+                                <td>
+                                    <input 
+                                        type="{{ nutrient.input_type }}" 
+                                        name="{{ nutrient.name }}" 
+                                        id="input_{{ nutrient.name }}" 
+                                        class="form-control" 
+                                        value="0" 
+                                        required 
+                                        step="0.1"
+                                        placeholder="0">
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn btn-success">Submit Intake</button>
+                </form>
+
+
+            {% endif %}
+
+            <div class="container mt-4">
+                <h3 class="text-center" style="color: var(--primary);">Weekly Intake vs Target</h3>
+                <canvas id="intakeChart" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            sidebar.classList.toggle('expanded');
+            if (mainContent) mainContent.classList.toggle('expanded');
+            
+            const isExpanded = sidebar.classList.contains('expanded');
+            localStorage.setItem('sidebarExpanded', isExpanded);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            const savedState = localStorage.getItem('sidebarExpanded');
+            if (savedState === 'true') {
+                sidebar.classList.add('expanded');
+                if (mainContent) mainContent.classList.add('expanded');
+            }
+
+            if (window.innerWidth <= 576) {
+                document.addEventListener('click', function(e) {
+                    if (!sidebar.contains(e.target) && !e.target.classList.contains('menu-toggle')) {
+                        sidebar.classList.remove('expanded');
+                        if (mainContent) mainContent.classList.remove('expanded');
+                        localStorage.setItem('sidebarExpanded', 'false');
+                    }
+                });
+            }
+
+            {% if not show_create_plan_message %}
+            $('#intakeRecordsTable').DataTable();
+            showDailyIntakeRecords();
+            {% endif %}
+        });
+
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        $.ajaxSetup({
+            beforeSend: function(xhr, settings) {
+                if (!(/^GET|HEAD|OPTIONS|TRACE$/i.test(settings.type))) {
+                    xhr.setRequestHeader("X-CSRFToken", getCSRFToken());
+                }
+            }
+        });
+
+        function showDailyIntakeRecords() {
+            $.ajax({
+                url: "/Cust/Diet/",
+                type: "POST",
+                data: { action: "fetch_daily_intakes" },
+                success: function(data) {
+                    if (data.status === "success") {
+                        let table = $('#intakeRecordsTable').DataTable();
+                        table.clear();
+                        data.intakes.forEach(intake => {
+                            table.row.add([
+                                intake.intake_id,
+                                intake.date,
+                                intake.calories.toFixed(1),
+                                intake.protein_grams.toFixed(1),
+                                intake.fat_grams.toFixed(1),
+                                intake.carb_grams.toFixed(1),
+                                intake.water_liters.toFixed(1)
+                            ]);
+                        });
+                        table.draw();
+                    } else {
+                        $('#foodResult').text('Error fetching intake records: ' + data.message).addClass('text-danger');
+                    }
+                },
+                error: function(xhr) {
+                    $('#foodResult').text('Error fetching intake records: ' + (xhr.responseJSON?.message || 'Unknown error')).addClass('text-danger');
+                }
+            });
+        }
+
+        $('#foodForm').submit(function(e) {
+            e.preventDefault();
+            $('#loading').show();
+            $('#foodResult').text('').removeClass('text-success text-danger');
+
+            const foodName = $('#foodName').val().trim();
+            const foodQuantity = parseFloat($('#foodQuantity').val());
+            if (!foodName || isNaN(foodQuantity) || foodQuantity <= 0) {
+                $('#loading').hide();
+                $('#foodResult').text('Please enter a valid food name and quantity (grams).').addClass('text-danger');
+                return;
+            }
+
+            const prompt = `${foodQuantity} grams of ${foodName}`;
+
+            $.ajax({
+                url: '/Cust/GetNutrition/',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({ prompt: prompt }),
+                success: function(data) {
+                    $('#loading').hide();
+                    if (data.error) {
+                        $('#foodResult').text('Error: ' + data.error).addClass('text-danger');
+                        return;
+                    }
+
+                    const keyMap = {
+                        calories: 'calories',
+                        protein: 'protein_grams',
+                        fat: 'fat_grams',
+                        carbs: 'carb_grams',
+                    };
+
+                    $('#foodResult')
+                        .text('Nutrient values fetched. Please review and submit your intake.')
+                        .removeClass('text-danger')
+                        .addClass('text-success');
+
+                    for (let key in keyMap) {
+                        const fieldName = keyMap[key];
+                        const input = $(`#input_${fieldName}`);
+                        input.val(parseFloat(data[key]).toFixed(1));
+                    }
+                    $('#foodForm')[0].reset();
+                },
+                error: function(xhr, status, error) {
+                    $('#loading').hide();
+                    const errorMsg = xhr.responseJSON?.error || 'Unknown error';
+                    $('#foodResult').text('Error fetching nutritional data: ' + errorMsg).addClass('text-danger');
+                }
+            });
+        });
+
+        $('#intakeForm').submit(function(e) {
+            e.preventDefault();
+            const formData = $(this).serialize();
+            $.post('/Cust/Diet/', formData, function(response) {
+                if (response.status === 'success') {
+                    const totals = response.totals;
+
+                    const nonZero = ['calories', 'protein', 'fat', 'carbs'].some(
+                        key => parseFloat(totals[key]) > 0
+                    );
+
+                    if (nonZero) {
+                        $('#foodResult')
+                            .text('Intake submitted successfully!')
+                            .removeClass('text-danger')
+                            .addClass('text-success');
+                    } else {
+                        $('#foodResult').text('').removeClass('text-danger text-success');
+                    }
+
+                    for (let key in totals) {
+                        let fieldName = key === 'calories' ? 'calories' : key === 'water' ? 'water_liters' : `${key}_grams`;
+                        const input = $(`#input_${fieldName}`);
+                        const actual = $(`#actual_${fieldName}`);
+                        const remaining = $(`#remaining_${fieldName}`);
+                        const target = $(`#target_${fieldName}`);
+
+                        const newValue = parseFloat(totals[key]).toFixed(1);
+                        input.val(newValue);
+                        actual.text(newValue);
+                        remaining.text((parseFloat(target.text()) - newValue).toFixed(1));
+                    }
+
+                    $('#intakeForm input[type="number"]').val('0');
+                    window.location.reload();
+                } else {
+                    $('#foodResult').text('Error submitting intake: ' + response.message).addClass('text-danger');
+                }
+            }).fail(function(xhr) {
+                $('#foodResult').text('Error submitting intake to server: ' + (xhr.responseJSON?.message || 'Unknown error')).addClass('text-danger');
+            });
+        });
+
+        const ctx = document.getElementById('intakeChart').getContext('2d');
+        const graphData = {{ graph_data|safe }};
+        const labels = graphData.map(d => d.date);
+        const target = {
+            calories: {{ diet_plan.calories|default:0 }},
+            protein: {{ diet_plan.protein_grams|default:0 }},
+            fat: {{ diet_plan.fat_grams|default:0 }},
+            carbs: {{ diet_plan.carb_grams|default:0 }},
+            water: {{ diet_plan.water_liters|default:0 }},
+        };
+
+        const datasets = [
+            { label: 'Calories', data: graphData.map(d => d.calories), borderColor: '#ff4d4d', backgroundColor: '#ff4d4d50', tension: 0.4 },
+            { label: 'Protein (g)', data: graphData.map(d => d.protein), borderColor: '#00ccff', backgroundColor: '#00ccff50', tension: 0.4 },
+            { label: 'Fat (g)', data: graphData.map(d => d.fat), borderColor: '#ffa500', backgroundColor: '#ffa50050', tension: 0.4 },
+            { label: 'Carbs (g)', data: graphData.map(d => d.carbs), borderColor: '#4CAF50', backgroundColor: '#4CAF5050', tension: 0.4 },
+            { label: 'Water (L)', data: graphData.map(d => d.water), borderColor: '#3f51b5', backgroundColor: '#3f51b550', tension: 0.4 },
+            { label: 'Target Calories', data: labels.map(() => target.calories), borderColor: '#ff0000', borderDash: [5, 5], fill: false, tension: 0.4 },
+            { label: 'Target Protein', data: labels.map(() => target.protein), borderColor: '#0099cc', borderDash: [5, 5], fill: false, tension: 0.4 },
+            { label: 'Target Fat', data: labels.map(() => target.fat), borderColor: '#cc9900', borderDash: [5, 5], fill: false, tension: 0.4 },
+            { label: 'Target Carbs', data: labels.map(() => target.carbs), borderColor: '#2e7d32', borderDash: [5, 5], fill: false, tension: 0.4 },
+            { label: 'Target Water', data: labels.map(() => target.water), borderColor: '#1a237e', borderDash: [5, 5], fill: false, tension: 0.4 }
+        ];
+
+        new Chart(ctx, {
+            type: 'line',
+            data: { labels: labels, datasets: datasets },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: { position: 'top', labels: { boxWidth: 12 } },
+                    title: { display: false }
+                },
+                interaction: { mode: 'index', intersect: false },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    </script>
+</body>
+</html>

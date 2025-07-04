@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainer - Workout Plans</title>
+    <link href="https://cdn.prod.website-files.com/67965768eaf7bb15225ae478/67965768eaf7bb15225ae607_Favcon.png" rel="shortcut icon" type="image/x-icon"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #203492;
+            --primary-light: #3a4ca8;
+            --secondary: #28a745;
+            --accent: #ff6b6b;
+            --light-bg: #f8faff;
+            --dark-text: #2d3748;
+            --light-text: #718096;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Sidebar styles */
+        .sidebar {
+            width: 72px;
+            height: 100vh;
+            background-color: var(--white);
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            padding-top: 12px;
+            transition: var(--transition);
+            overflow-y: auto;
+            box-shadow: var(--shadow-sm);
+            z-index: 1000;
+        }
+        
+        .sidebar.expanded {
+            width: 240px;
+            padding-left: 12px;
+        }
+        
+        .sidebar-item {
+            width: calc(100% - 24px);
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 4px 12px;
+            text-decoration: none;
+            color: var(--dark-text);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        
+        .sidebar-item:hover {
+            background-color: rgba(32, 52, 146, 0.1);
+        }
+        
+        .sidebar-item.active {
+            background-color: rgba(32, 52, 146, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .sidebar-item.active .sidebar-icon {
+            color: var(--primary);
+        }
+        
+        .sidebar-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+            margin-right: 24px;
+            flex-shrink: 0;
+            color: var(--light-text);
+            transition: var(--transition);
+        }
+        
+        .sidebar-text {
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .sidebar.expanded .sidebar-text {
+            display: inline-block;
+        }
+        
+        .menu-toggle {
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            color: var(--dark-text);
+            border-radius: 8px;
+            margin: 0 12px 12px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        
+        .menu-toggle:hover {
+            background-color: rgba(32, 52, 146, 0.1);
+        }
+        
+        .menu-toggle .sidebar-icon {
+            margin-right: 0;
+        }
+        
+        .sidebar.expanded .menu-toggle .sidebar-icon {
+            margin-right: 24px;
+        }
+        
+        .main-content {
+            margin-left: 72px;
+            flex-grow: 1;
+            transition: var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content.expanded {
+            margin-left: 240px;
+        }
+
+        /* Navbar styles */
+        .navbar {
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            color: var(--dark-text);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            margin: 0 0.2rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--white);
+            background-color: var(--primary);
+        }
+        
+        .nav-link.logout {
+            color: var(--accent);
+            background-color: rgba(255, 107, 107, 0.1);
+        }
+        
+        .nav-link.logout:hover {
+            color: var(--white);
+            background-color: var(--accent);
+        }
+
+        /* Content styles */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            flex-grow: 1;
+        }
+        
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        h3 {
+            color: var(--primary-light);
+            margin-bottom: 1rem;
+        }
+        
+        /* Workout specific styles */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            background: rgba(32, 52, 146, 0.05);
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        
+        .tab:hover {
+            background: rgba(32, 52, 146, 0.1);
+        }
+        
+        .tab.active {
+            background: var(--primary);
+            color: var(--white);
+        }
+        
+        .exercise {
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 1px solid rgba(0,0,0,0.05);
+            border-radius: 8px;
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+        }
+        
+        .exercise:hover {
+            box-shadow: var(--shadow-md);
+        }
+        
+        .exercise h4 {
+            margin-bottom: 10px;
+            color: var(--primary);
+        }
+        
+        .exercise p {
+            margin: 5px 0;
+            color: var(--dark-text);
+        }
+        
+        .day-content {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Exercise dropdown styles */
+        .exercise-item {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .exercise-select {
+            flex-grow: 1;
+            margin-right: 10px;
+        }
+        
+        .remove-exercise-btn {
+            flex-shrink: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Plan info styles */
+        .plan-info {
+            background-color: rgba(32, 52, 146, 0.05);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .plan-info p {
+            margin: 5px 0;
+        }
+        
+        /* Save button */
+        .save-all-btn {
+            margin-top: 20px;
+            width: 100%;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 15px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1050;
+            }
+            
+            .sidebar.expanded {
+                transform: translateX(0);
+                width: 240px;
+            }
+            
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% csrf_token %}
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars sidebar-icon"></i>
+            <span class="sidebar-text">Menu</span>
+        </div>
+        
+        <a href="/Trainer/Trainer_Cat" class="sidebar-item">
+            <i class="fas fa-medal sidebar-icon"></i>
+            <span class="sidebar-text">Trainer Category</span>
+        </a>
+        
+        <a href="/Trainer/Trainer" class="sidebar-item">
+            <i class="fas fa-user-tie sidebar-icon"></i>
+            <span class="sidebar-text">Trainer</span>
+        </a>
+        
+        <a href="/Trainer/Exercise" class="sidebar-item">
+            <i class="fas fa-running sidebar-icon"></i>
+            <span class="sidebar-text">Exercises</span>
+        </a>
+        
+        <a href="/Trainer/Session" class="sidebar-item">
+            <i class="fas fa-calendar-check sidebar-icon"></i>
+            <span class="sidebar-text">Session</span>
+        </a>
+        
+        <a href="/Trainer/Customer" class="sidebar-item">
+            <i class="fas fa-users sidebar-icon"></i>
+            <span class="sidebar-text">Customer</span>
+        </a>
+        
+        <a href="/Trainer/Assessment" class="sidebar-item">
+            <i class="fas fa-heartbeat sidebar-icon"></i>
+            <span class="sidebar-text">Fitness Assessment</span>
+        </a>
+        
+        <a href="/Trainer/Booking" class="sidebar-item">
+            <i class="fas fa-calendar-alt sidebar-icon"></i>
+            <span class="sidebar-text">Booking</span>
+        </a>
+        
+        <a href="/Trainer/Records" class="sidebar-item">
+            <i class="fas fa-chart-line sidebar-icon"></i>
+            <span class="sidebar-text">Fitness Records</span>
+        </a>
+        
+        <a href="/Trainer/Workout" class="sidebar-item active">
+            <i class="fas fa-dumbbell sidebar-icon"></i>
+            <span class="sidebar-text">Workout Plans</span>
+        </a>
+        
+        <a href="/Trainer/Diet" class="sidebar-item">
+            <i class="fas fa-utensils sidebar-icon"></i>
+            <span class="sidebar-text">Diet Plans</span>
+        </a>
+        
+        <a href="/Trainer/Analytics" class="sidebar-item">
+            <i class="fas fa-chart-pie sidebar-icon"></i>
+            <span class="sidebar-text">Fitness Analytics</span>
+        </a>
+        
+        <a href="/Trainer/TR_Bills" class="sidebar-item">
+            <i class="fas fa-file-invoice-dollar sidebar-icon"></i>
+            <span class="sidebar-text">All Bills</span>
+        </a>
+    </div>
+    
+    <div class="main-content" id="mainContent">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <a class="navbar-brand" href="/Trainer/Dashboard">
+                <i class="fas fa-dumbbell"></i>
+                Virtual Fitness
+            </a>
+            <div>
+                <a class="nav-link logout" href="/Home/Logout">
+                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                </a>
+            </div>
+        </nav>
+
+        <div class="container">
+            <h1>Customer Workout Plans</h1>
+            
+            <div class="table-container">
+                <table id="customersTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Customer ID</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Current Workout Plan</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers %}
+                        <tr>
+                            <td>{{ customer.customer_id }}</td>
+                            <td>{{ customer.customer_name }}</td>
+                            <td>{{ customer.customer_email }}</td>
+                            <td>
+                                {% if customer.current_workout %}
+                                    {{ customer.current_workout.workout_split }} (since {{ customer.current_workout.week_start_date }})
+                                {% else %}
+                                    No workout plan
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if customer.current_workout %}
+                                <button class="btn btn-primary" onclick="showWorkoutPlan('{{ customer.customer_id }}', '{{ customer.current_workout.plan_id }}')">
+                                    <i class="fas fa-dumbbell me-1"></i> Show Workout
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Workout Plan Details Section -->
+            <div id="workoutPlanContainer" class="form-container" style="display: none;">
+                <button class="btn btn-danger close-btn" onclick="hideWorkoutPlan()">
+                    <i class="fas fa-times me-1"></i> Close
+                </button>
+                
+                <div class="plan-info">
+                    <h3 id="customerName"></h3>
+                    <p><strong>Goal:</strong> <span id="workoutGoal"></span></p>
+                    <p><strong>Week Start Date:</strong> <span id="weekStartDate"></span></p>
+                    <p><strong>Workout Split:</strong> <span id="workoutSplit"></span></p>
+                </div>
+                
+                <div class="tabs">
+                    <div class="tab active" data-day="mon">Monday</div>
+                    <div class="tab" data-day="tue">Tuesday</div>
+                    <div class="tab" data-day="wed">Wednesday</div>
+                    <div class="tab" data-day="thu">Thursday</div>
+                    <div class="tab" data-day="fri">Friday</div>
+                    <div class="tab" data-day="sat">Saturday</div>
+                    <div class="tab" data-day="sun">Sunday</div>
+                </div>
+                
+                <div class="day-content" id="monDay" style="display: block;">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Monday Exercises</h4>
+                        <button type="button" class="btn btn-sm btn-primary add-exercise-btn" data-day="mon">
+                            <i class="fas fa-plus me-1"></i> Add Exercise
+                        </button>
+                    </div>
+                    <div id="monExercisesContainer" class="exercises-container">
+                        <!-- Exercises will be added here -->
+                    </div>
+                </div>
+                
+                <div class="day-content" id="tueDay">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Tuesday Exercises</h4>
+                        <button type="button" class="btn btn-sm btn-primary add-exercise-btn" data-day="tue">
+                            <i class="fas fa-plus me-1"></i> Add Exercise
+                        </button>
+                    </div>
+                    <div id="tueExercisesContainer" class="exercises-container">
+                        <!-- Exercises will be added here -->
+                    </div>
+                </div>
+                
+                <div class="day-content" id="wedDay">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Wednesday Exercises</h4>
+                        <button type="button" class="btn btn-sm btn-primary add-exercise-btn" data-day="wed">
+                            <i class="fas fa-plus me-1"></i> Add Exercise
+                        </button>
+                    </div>
+                    <div id="wedExercisesContainer" class="exercises-container">
+                        <!-- Exercises will be added here -->
+                    </div>
+                </div>
+                
+                <div class="day-content" id="thuDay">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Thursday Exercises</h4>
+                        <button type="button" class="btn btn-sm btn-primary add-exercise-btn" data-day="thu">
+                            <i class="fas fa-plus me-1"></i> Add Exercise
+                        </button>
+                    </div>
+                    <div id="thuExercisesContainer" class="exercises-container">
+                        <!-- Exercises will be added here -->
+                    </div>
+                </div>
+                
+                <div class="day-content" id="friDay">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Friday Exercises</h4>
+                        <button type="button" class="btn btn-sm btn-primary add-exercise-btn" data-day="fri">
+                            <i class="fas fa-plus me-1"></i> Add Exercise
+                        </button>
+                    </div>
+                    <div id="friExercisesContainer" class="exercises-container">
+                        <!-- Exercises will be added here -->
+                    </div>
+                </div>
+                
+                <div class="day-content" id="satDay">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Saturday Exercises</h4>
+                        <button type="button" class="btn btn-sm btn-primary add-exercise-btn" data-day="sat">
+                            <i class="fas fa-plus me-1"></i> Add Exercise
+                        </button>
+                    </div>
+                    <div id="satExercisesContainer" class="exercises-container">
+                        <!-- Exercises will be added here -->
+                    </div>
+                </div>
+                
+                <div class="day-content" id="sunDay">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h4>Sunday Exercises</h4>
+                        <button type="button" class="btn btn-sm btn-primary add-exercise-btn" data-day="sun">
+                            <i class="fas fa-plus me-1"></i> Add Exercise
+                        </button>
+                    </div>
+                    <div id="sunExercisesContainer" class="exercises-container">
+                        <!-- Exercises will be added here -->
+                    </div>
+                </div>
+                
+                <button id="saveWorkoutBtn" class="btn btn-primary save-all-btn">
+                    <i class="fas fa-save me-1"></i> Save All Changes
+                </button>
+                
+                <input type="hidden" id="currentPlanId">
+                <input type="hidden" id="currentCustomerId">
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        // Global variable to store exercises
+        let exercises = [];
+        let currentWorkoutData = {};
+
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === ('csrftoken=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        // Sidebar functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            sidebar.classList.toggle('expanded');
+            if (mainContent) mainContent.classList.toggle('expanded');
+            
+            // Save state
+            const isExpanded = sidebar.classList.contains('expanded');
+            localStorage.setItem('sidebarExpanded', isExpanded);
+        }
+        
+        // Initialize sidebar state
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            // Load saved state
+            const savedState = localStorage.getItem('sidebarExpanded');
+            if (savedState === 'true') {
+                sidebar.classList.add('expanded');
+                if (mainContent) mainContent.classList.add('expanded');
+            }
+
+            // Initialize DataTables
+            $('#customersTable').DataTable();
+
+            // Close sidebar when clicking outside on mobile
+            if (window.innerWidth <= 576) {
+                document.addEventListener('click', function(e) {
+                    if (!sidebar.contains(e.target) && !e.target.classList.contains('menu-toggle')) {
+                        sidebar.classList.remove('expanded');
+                        if (mainContent) mainContent.classList.remove('expanded');
+                        localStorage.setItem('sidebarExpanded', 'false');
+                    }
+                });
+            }
+
+            // Fetch exercises when the page loads
+            fetchExercises();
+        });
+
+        // Fetch exercises from server
+        function fetchExercises() {
+            $.ajax({
+                url: "/Trainer/Workout/",
+                type: "POST",
+                headers: { "X-CSRFToken": getCSRFToken() },
+                data: { action: "fetch_exercises" },
+                success: function (data) {
+                    if (data.status === "success") {
+                        exercises = data.exercises;
+                    }
+                },
+                error: function (xhr) {
+                    console.error("Error fetching exercises:", xhr.responseText);
+                }
+            });
+        }
+
+        // Show workout plan for a customer
+        function showWorkoutPlan(customerId, planId) {
+            $('#currentCustomerId').val(customerId);
+            $('#currentPlanId').val(planId);
+            
+            $.ajax({
+                url: "/Trainer/Workout/",
+                type: "POST",
+                headers: { "X-CSRFToken": getCSRFToken() },
+                data: { action: "fetch_workout_details", plan_id: planId },
+                success: function (data) {
+                    if (data.status === "success") {
+                        currentWorkoutData = data.workout;
+                        
+                        // Display customer and plan info
+                        $('#customerName').text(data.customer_name + "'s Workout Plan");
+                        $('#workoutGoal').text(data.workout.goal);
+                        $('#weekStartDate').text(data.workout.week_start_date);
+                        $('#workoutSplit').text(data.workout.workout_split);
+                        
+                        // Initialize exercise dropdowns for each day
+                        ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
+                            initializeDayExercises(day, data.workout[`${day}_exercises`]);
+                        });
+                        
+                        // Show the container
+                        $('#workoutPlanContainer').show();
+                        $('html, body').animate({ scrollTop: $('#workoutPlanContainer').offset().top }, 500);
+                    } else {
+                        alert("Error fetching workout details: " + data.message);
+                    }
+                },
+                error: function (xhr) {
+                    alert("Error fetching workout details: " + xhr.responseText);
+                }
+            });
+        }
+        
+        // Initialize exercises for a specific day
+        function initializeDayExercises(day, exercisesText) {
+            const containerId = `${day}ExercisesContainer`;
+            $(`#${containerId}`).empty();
+            
+            if (exercisesText && exercisesText.length > 0) {
+                // Split exercises by comma and populate dropdowns
+                const exerciseList = exercisesText.split(',').map(ex => ex.trim()).filter(ex => ex !== '');
+                
+                if (exerciseList.length > 0) {
+                    exerciseList.forEach((exerciseName, index) => {
+                        addExerciseDropdown(day, exerciseName);
+                    });
+                } else {
+                    // Add one empty dropdown if no exercises
+                    addExerciseDropdown(day);
+                }
+            } else {
+                // Add one empty dropdown if no exercises
+                addExerciseDropdown(day);
+            }
+        }
+        
+        // Add a new exercise dropdown for a specific day
+        function addExerciseDropdown(day, selectedExercise = null) {
+            const containerId = `${day}ExercisesContainer`;
+            const dropdownId = `${day}Exercise${$('#' + containerId).children().length + 1}`;
+            
+            const exerciseDropdown = `
+                <div class="exercise-item mb-2 d-flex align-items-center">
+                    <select class="form-control exercise-select me-2" id="${dropdownId}" name="${day}_exercises[]">
+                        <option value="">Select Exercise</option>
+                        ${exercises.map(ex => 
+                            `<option value="${ex.exercise_id}" ${selectedExercise === ex.exercise_name ? 'selected' : ''}>
+                                ${ex.exercise_name}
+                            </option>`
+                        ).join('')}
+                    </select>
+                    <button type="button" class="btn btn-sm btn-danger remove-exercise-btn">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            $('#' + containerId).append(exerciseDropdown);
+        }
+        
+        // Hide workout plan details
+        function hideWorkoutPlan() {
+            $('#workoutPlanContainer').hide();
+        }
+        
+        // Tab switching
+        $(document).on('click', '.tab', function() {
+            $('.tab').removeClass('active');
+            $(this).addClass('active');
+            $('.day-content').hide();
+            $(`#${$(this).data('day')}Day`).show();
+        });
+        
+        // Handle adding new exercises
+        $(document).on('click', '.add-exercise-btn', function() {
+            const day = $(this).data('day');
+            addExerciseDropdown(day);
+        });
+        
+        // Handle removing exercises
+        $(document).on('click', '.remove-exercise-btn', function() {
+            $(this).closest('.exercise-item').remove();
+        });
+        
+        // Save all changes to the workout plan
+        $('#saveWorkoutBtn').click(function() {
+            const planId = $('#currentPlanId').val();
+            const customerId = $('#currentCustomerId').val();
+            
+            if (!planId || !customerId) {
+                alert("Error: No workout plan selected");
+                return;
+            }
+            
+            // Collect all form data
+            let formData = {
+                action: "update_workout",
+                plan_id: planId,
+                customer_id: customerId,
+                goal: currentWorkoutData.goal,
+                week_start_date: currentWorkoutData.week_start_date,
+                workout_split: currentWorkoutData.workout_split
+            };
+            
+            // For each day, combine selected exercises into a comma-separated string
+            ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'].forEach(day => {
+                const exerciseNames = [];
+                $(`#${day}ExercisesContainer select[name="${day}_exercises[]"]`).each(function() {
+                    const exerciseId = $(this).val();
+                    if (exerciseId) {
+                        const exercise = exercises.find(ex => ex.exercise_id === exerciseId);
+                        if (exercise) {
+                            exerciseNames.push(exercise.exercise_name);
+                        }
+                    }
+                });
+                
+                // Add the combined exercises as a single field
+                formData[`${day}_exercises`] = exerciseNames.join(',');
+            });
+            
+            $.ajax({
+                url: "/Trainer/Workout/",
+                type: "POST",
+                headers: { "X-CSRFToken": getCSRFToken() },
+                data: formData,
+                success: function (data) {
+                    if (data.status === "success") {
+                        alert("Workout plan updated successfully!");
+                        // Refresh the workout details
+                        showWorkoutPlan(customerId, planId);
+                    } else {
+                        alert("Error updating workout plan: " + data.message);
+                    }
+                },
+                error: function (xhr) {
+                    alert("Error updating workout plan: " + xhr.responseText);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

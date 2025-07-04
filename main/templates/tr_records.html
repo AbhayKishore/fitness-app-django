@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainer - Fitness Records</title>
+    <link href="https://cdn.prod.website-files.com/67965768eaf7bb15225ae478/67965768eaf7bb15225ae607_Favcon.png" rel="shortcut icon" type="image/x-icon"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #203492;
+            --primary-light: #3a4ca8;
+            --secondary: #28a745;
+            --accent: #ff6b6b;
+            --light-bg: #f8faff;
+            --dark-text: #2d3748;
+            --light-text: #718096;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .sidebar {
+            width: 72px;
+            height: 100vh;
+            background-color: var(--white);
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            padding-top: 12px;
+            transition: var(--transition);
+            overflow-y: auto;
+            box-shadow: var(--shadow-sm);
+            z-index: 1000;
+        }
+        
+        .sidebar.expanded {
+            width: 240px;
+            padding-left: 12px;
+        }
+        
+        .sidebar-item {
+            width: calc(100% - 24px);
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 4px 12px;
+            text-decoration: none;
+            color: var(--dark-text);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        
+        .sidebar-item:hover {
+            background-color: rgba(32, 52, 146, 0.1);
+        }
+        
+        .sidebar-item.active {
+            background-color: rgba(32, 52, 146, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .sidebar-item.active .sidebar-icon {
+            color: var(--primary);
+        }
+        
+        .sidebar-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+            margin-right: 24px;
+            flex-shrink: 0;
+            color: var(--light-text);
+            transition: var(--transition);
+        }
+        
+        .sidebar-text {
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .sidebar.expanded .sidebar-text {
+            display: inline-block;
+        }
+        
+        .menu-toggle {
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            color: var(--dark-text);
+            border-radius: 8px;
+            margin: 0 12px 12px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        
+        .menu-toggle:hover {
+            background-color: rgba(32, 52, 146, 0.1);
+        }
+        
+        .menu-toggle .sidebar-icon {
+            margin-right: 0;
+        }
+        
+        .sidebar.expanded .menu-toggle .sidebar-icon {
+            margin-right: 24px;
+        }
+        
+        .main-content {
+            margin-left: 72px;
+            flex-grow: 1;
+            transition: var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content.expanded {
+            margin-left: 240px;
+        }
+
+        .navbar {
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            color: var(--dark-text);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            margin: 0 0.2rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--white);
+            background-color: var(--primary);
+        }
+        
+        .nav-link.logout {
+            color: var(--accent);
+            background-color: rgba(255, 107, 107, 0.1);
+        }
+        
+        .nav-link.logout:hover {
+            color: var(--white);
+            background-color: var(--accent);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            flex-grow: 1;
+        }
+        
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        h3 {
+            color: var(--primary);
+            margin-top: 1.5rem;
+        }
+        
+        .table-container {
+            margin-top: 30px;
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        th {
+            background-color: rgba(32, 52, 146, 0.05);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+        
+        .btn-success {
+            background-color: var(--secondary);
+            border-color: var(--secondary);
+        }
+        
+        .btn-danger {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .btn-danger:hover {
+            background-color: #e04f4f;
+            border-color: #e04f4f;
+        }
+        
+        .form-container {
+            display: none;
+            margin-top: 30px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .plan-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .day-exercises {
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: white;
+            border-radius: 5px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 15px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1050;
+            }
+            
+            .sidebar.expanded {
+                transform: translateX(0);
+                width: 240px;
+            }
+            
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% csrf_token %}
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars sidebar-icon"></i>
+            <span class="sidebar-text">Menu</span>
+        </div>
+        
+       
+        
+        <a href="/Trainer/Trainer_Cat" class="sidebar-item">
+            <i class="fas fa-medal sidebar-icon"></i>
+            <span class="sidebar-text">Trainer Category</span>
+        </a>
+        
+        <a href="/Trainer/Trainer" class="sidebar-item">
+            <i class="fas fa-user-tie sidebar-icon"></i>
+            <span class="sidebar-text">Trainer</span>
+        </a>
+        
+        <a href="/Trainer/Exercise" class="sidebar-item">
+            <i class="fas fa-running sidebar-icon"></i>
+            <span class="sidebar-text">Exercises</span>
+        </a>
+        
+        <a href="/Trainer/Session" class="sidebar-item">
+            <i class="fas fa-calendar-check sidebar-icon"></i>
+            <span class="sidebar-text">Session</span>
+        </a>
+        
+        <a href="/Trainer/Customer" class="sidebar-item">
+            <i class="fas fa-users sidebar-icon"></i>
+            <span class="sidebar-text">Customer</span>
+        </a>
+        
+        <a href="/Trainer/Assessment" class="sidebar-item">
+            <i class="fas fa-heartbeat sidebar-icon"></i>
+            <span class="sidebar-text">Fitness Assessment</span>
+        </a>
+        
+        <a href="/Trainer/Booking" class="sidebar-item">
+            <i class="fas fa-calendar-alt sidebar-icon"></i>
+            <span class="sidebar-text">Booking</span>
+        </a>
+        
+        <a href="/Trainer/Records" class="sidebar-item active">
+            <i class="fas fa-chart-line sidebar-icon"></i>
+            <span class="sidebar-text">Fitness Records</span>
+        </a>
+    
+        <a href="/Trainer/Workout" class="sidebar-item">
+            <i class="fas fa-dumbbell sidebar-icon"></i>
+            <span class="sidebar-text">Workout Plans</span>
+        </a>
+                <a href="/Trainer/Diet" class="sidebar-item ">
+            <i class="fas fa-utensils sidebar-icon"></i>
+            <span class="sidebar-text">Diet Plans</span>
+        </a>
+        
+        <a href="/Trainer/Analytics" class="sidebar-item">
+            <i class="fas fa-chart-pie sidebar-icon"></i>
+            <span class="sidebar-text">Fitness Analytics</span>
+        </a>
+        
+        <a href="/Trainer/TR_Bills" class="sidebar-item">
+            <i class="fas fa-file-invoice-dollar sidebar-icon"></i>
+            <span class="sidebar-text">All Bills</span>
+        </a>
+    </div>
+    
+    <div class="main-content" id="mainContent">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <a class="navbar-brand" href="/Trainer/Dashboard">
+                <i class="fas fa-dumbbell"></i>
+                Virtual Fitness
+            </a>
+            <div>
+                <a class="nav-link logout" href="/Home/Logout">
+                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                </a>
+            </div>
+        </nav>
+
+        <div class="container">
+            <h1>Fitness Records Management</h1>
+
+            <div class="table-container">
+                <table id="customersTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Customer Name</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for customer in customers %}
+                        <tr>
+                            <td>{{ customer.customer_name }} ({{ customer.customer_email }})</td>
+                            <td>
+                                <button class="btn btn-primary" onclick="showCustomerRecords('{{ customer.customer_id }}')">
+                                    <i class="fas fa-eye me-1"></i> View Records
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="recordsContainer" class="table-container" style="display: none;">
+                <button class="btn btn-danger close-btn" onclick="hideRecords()">
+                    <i class="fas fa-times me-1"></i> Close
+                </button>
+                <table id="recordsTable" class="display">
+                    <thead>
+                        <tr>
+                            <th>Record ID</th>
+                            <th>Goal</th>
+                            <th>Workout Split</th>
+                            <th>Week Start Date</th>
+                            <th>Diet Calories</th>
+                            <th>Diet Protein (g)</th>
+                            <th>Diet Fat (g)</th>
+                            <th>Diet Carbs (g)</th>
+                            <th>Diet Water (L)</th>
+                            <th>Diet Week Start Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <div id="exerciseDetailsContainer" class="form-container">
+                <button class="btn btn-danger close-btn" onclick="hideExerciseDetails()">
+                    <i class="fas fa-times me-1"></i> Close
+                </button>
+                <h3>Exercise Details</h3>
+                <div class="plan-section" id="exerciseDetailsContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            sidebar.classList.toggle('expanded');
+            if (mainContent) mainContent.classList.toggle('expanded');
+            
+            const isExpanded = sidebar.classList.contains('expanded');
+            localStorage.setItem('sidebarExpanded', isExpanded);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            const savedState = localStorage.getItem('sidebarExpanded');
+            if (savedState === 'true') {
+                sidebar.classList.add('expanded');
+                if (mainContent) mainContent.classList.add('expanded');
+            }
+
+            $('#customersTable').DataTable();
+            $('#recordsTable').DataTable();
+
+            if (window.innerWidth <= 576) {
+                document.addEventListener('click', function(e) {
+                    if (!sidebar.contains(e.target) && !e.target.classList.contains('menu-toggle')) {
+                        sidebar.classList.remove('expanded');
+                        if (mainContent) mainContent.classList.remove('expanded');
+                        localStorage.setItem('sidebarExpanded', 'false');
+                    }
+                });
+            }
+        });
+
+        function getCSRFToken() {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, 10) === 'csrftoken=') {
+                        cookieValue = decodeURIComponent(cookie.substring(10));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function showCustomerRecords(customerId) {
+            $.ajax({
+                url: "/Trainer/Records/",
+                type: "POST",
+                headers: { "X-CSRFToken": getCSRFToken() },
+                data: { action: "fetch_customer_records", customer_id: customerId },
+                success: function(data) {
+                    if (data.status === "success") {
+                        let table = $('#recordsTable').DataTable();
+                        table.clear();
+                        data.records.forEach(record => {
+                            table.row.add([
+                                record.record_id,
+                                record.goal,
+                                record.workout_split || 'No workout plan',
+                                record.week_start_date || 'N/A',
+                                record.diet_calories || 'N/A',
+                                record.diet_protein_grams || 'N/A',
+                                record.diet_fat_grams || 'N/A',
+                                record.diet_carb_grams || 'N/A',
+                                record.diet_water_liters || 'N/A',
+                                record.diet_week_start_date || 'N/A',
+                                record.workout_split ?
+                                    `<button class="btn btn-primary btn-sm" onclick="showExerciseDetails('${record.plan_id}')">
+                                        <i class="fas fa-eye me-1"></i> Show Exercise
+                                    </button>` : ''
+                            ]);
+                        });
+                        table.draw();
+                        $('#recordsContainer').show();
+                        $('html, body').animate({ scrollTop: $('#recordsContainer').offset().top }, 500);
+                    } else {
+                        alert("Error fetching records: " + data.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert("Error fetching records: " + xhr.responseText);
+                }
+            });
+        }
+
+        function hideRecords() {
+            $('#recordsContainer').hide();
+            $('#recordsTable').DataTable().clear().draw();
+        }
+
+        function showExerciseDetails(planId) {
+            $.ajax({
+                url: "/Trainer/Records/",
+                type: "POST",
+                headers: { "X-CSRFToken": getCSRFToken() },
+                data: { action: "fetch_workout_details", plan_id: planId },
+                success: function(data) {
+                    if (data.status === "success") {
+                        let exerciseContent = `
+                            <h4>Exercise Plan for ${planId}</h4>
+                            <p><strong>Goal:</strong> ${data.workout.goal}</p>
+                            <p><strong>Week Start Date:</strong> ${data.workout.week_start_date}</p>
+                            <p><strong>Workout Split:</strong> ${data.workout.workout_split}</p>
+                            <h5 class="mt-3">Exercise Plan</h5>
+                            ${data.workout.mon_exercises ? `<div class="day-exercises"><strong>Monday:</strong><br>${data.workout.mon_exercises.replace(/\n/g, '<br>')}</div>` : ''}
+                            ${data.workout.tue_exercises ? `<div class="day-exercises"><strong>Tuesday:</strong><br>${data.workout.tue_exercises.replace(/\n/g, '<br>')}</div>` : ''}
+                            ${data.workout.wed_exercises ? `<div class="day-exercises"><strong>Wednesday:</strong><br>${data.workout.wed_exercises.replace(/\n/g, '<br>')}</div>` : ''}
+                            ${data.workout.thu_exercises ? `<div class="day-exercises"><strong>Thursday:</strong><br>${data.workout.thu_exercises.replace(/\n/g, '<br>')}</div>` : ''}
+                            ${data.workout.fri_exercises ? `<div class="day-exercises"><strong>Friday:</strong><br>${data.workout.fri_exercises.replace(/\n/g, '<br>')}</div>` : ''}
+                            ${data.workout.sat_exercises ? `<div class="day-exercises"><strong>Saturday:</strong><br>${data.workout.sat_exercises.replace(/\n/g, '<br>')}</div>` : ''}
+                            ${data.workout.sun_exercises ? `<div class="day-exercises"><strong>Sunday:</strong><br>${data.workout.sun_exercises.replace(/\n/g, '<br>')}</div>` : ''}
+                        `;
+                        $('#exerciseDetailsContent').html(exerciseContent);
+                        $('#exerciseDetailsContainer').show();
+                        $('html, body').animate({ scrollTop: $('#exerciseDetailsContainer').offset().top }, 500);
+                    } else {
+                        alert("Error fetching exercise details: " + data.message);
+                    }
+                },
+                error: function(xhr) {
+                    alert("Error fetching exercise details: " + xhr.responseText);
+                }
+            });
+        }
+
+        function hideExerciseDetails() {
+            $('#exerciseDetailsContainer').hide();
+            $('#exerciseDetailsContent').empty();
+        }
+    </script>
+</body>
+</html>

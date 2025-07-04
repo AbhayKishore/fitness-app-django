@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment</title>
+    <link href="https://cdn.prod.website-files.com/67965768eaf7bb15225ae478/67965768eaf7bb15225ae607_Favcon.png" rel="shortcut icon" type="image/x-icon" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('https://content.rsggroup.com/image/upload/q_auto,f_auto/v1620635033/GoldsGym/Studio%20Berlin/210310_GOLDSGYM_Interior_0463.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.8);  /* Slight transparency */
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="card p-4 shadow mx-auto" style="max-width: 600px;">
+            <h3 class="text-center">Payment</h3>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <label>Card Name:</label>
+                <input type="text" class="form-control mb-3" name="card_name" required>
+
+                <label>Card Number:</label>
+                <input type="text" class="form-control mb-3" name="card_number" required>
+
+                <label>Expiry Date:</label>
+                <input type="date" class="form-control mb-3" name="card_expiry" required>
+
+                <label>CVV</label>
+                <input type="number" class="form-control mb-3" name="CVV" required>
+
+                <button type="submit" class="btn btn-success w-100">Pay ₹{{ amount }}</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

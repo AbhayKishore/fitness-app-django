@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Report</title>
+    <link href="https://cdn.prod.website-files.com/67965768eaf7bb15225ae478/67965768eaf7bb15225ae607_Favcon.png" rel="shortcut icon" type="image/x-icon"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f8f9fa;
+        }
+
+        .report-box {
+            max-width: 900px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .report-box table {
+            width: 100%;
+            line-height: 1.6;
+            text-align: left;
+            border-collapse: collapse;
+        }
+
+        .report-box table th, .report-box table td {
+            padding: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .company-logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .company-logo img {
+            max-width: 100px;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .report-title {
+            text-align: center;
+            color: #203492;
+            margin-bottom: 20px;
+        }
+
+        .date-section {
+            text-align: right;
+            font-size: 14px;
+            color: #555;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+        }
+
+        /* Hide elements not needed in print */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            .report-box, .report-box * {
+                visibility: visible;
+            }
+            .report-box {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                margin: 0;
+                box-shadow: none;
+                border: none;
+            }
+            .print-button {
+                display: none; /* Hide the print button during printing */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center; margin-top: 20px;">
+        <button class="print-button" onclick="printReport()">Print Report</button>
+    </div>
+    <div class="report-box">
+        <div class="company-logo">
+            <!-- Add Print Button -->
+            <img src="https://cdn.prod.website-files.com/67965768eaf7bb15225ae478/67965768eaf7bb15225ae608_Webclip.png" alt="Company Logo">
+            <h2>F COMPANY</h2>
+            <p>123 Fitness Street, Healthy City, IN - 500001</p>
+        </div>
+
+        <h3 class="report-title">{{report_type }} Report</h3>
+        <p class="date-section"><strong>Generated On:</strong> {{ date }}</p>
+
+        <table>
+            <thead>
+                {% if report_type in customer_reports %}
+                <tr>
+                    <th>Customer ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Category</th>
+                    <th>Joined Date</th>
+                    <th>Status</th>
+                </tr>
+                {% elif report_type in trainer_reports %}
+                <tr>
+                    <th>Trainer ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Category</th>
+                    <th>Status</th>
+                </tr>
+                {% elif report_type in payment_reports %}
+                <tr>
+                    <th>Payment ID</th>
+                    <th>Customer</th>
+                    <th>Amount (₹)</th>
+                    <th>Date</th>
+                </tr>
+                {% elif report_type in assessment_reports %}
+                <tr>
+                    <th>Assessment ID</th>
+                    <th>Customer</th>
+                    <th>Height</th>
+                    <th>Weight</th>
+                    <th>Fat Mass</th>
+                    <th>Muscle Mass</th>
+                    <th>Date</th>
+                </tr>
+                {% elif report_type in booking_reports %}
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Customer</th>
+                    <th>Trainer</th>
+                    <th>Session Date</th>
+                    <th>Session Time</th>
+                </tr>
+                {% endif %}
+            </thead>
+            <tbody>
+                {% for entry in data %}
+                <tr>
+                    {% if report_type in customer_reports %}
+                    <td>{{ entry.customer_id }}</td>
+                    <td>{{ entry.customer_name }}</td>
+                    <td>{{ entry.customer_email }}</td>
+                    <td>{{ entry.customer_phone }}</td>
+                    <td>{{ entry.cat_id.category_name }}</td>
+                    <td>{{ entry.join_date }}</td>                    <td>{{ entry.customer_status|yesno:"Active,Inactive" }}</td>
+                    {% elif report_type in trainer_reports %}
+                    <td>{{ entry.trainer_id }}</td>
+                    <td>{{ entry.trainer_name }}</td>
+                    <td>{{ entry.trainer_email }}</td>
+                    <td>{{ entry.cat_id.category_name }}</td>
+                    <td>{{ entry.trainer_status|yesno:"Active,Inactive" }}</td>
+                    {% elif report_type in payment_reports %}
+                    <td>{{ entry.payment_id }}</td>
+                    <td>{{ entry.customer_id.customer_name }}</td>
+                    <td>₹{{ entry.amount }}</td>
+                    <td>{{ entry.payment_date }}</td>
+                    {% elif report_type in assessment_reports %}
+                    <td>{{ entry.assessment_id }}</td>
+                    <td>{{ entry.customer_id.customer_name }}</td>
+                    <td>{{ entry.height }}</td>
+                    <td>{{ entry.weight }}</td>
+                    <td>{{ entry.fat_mass }}</td>
+                    <td>{{ entry.muscle_mass }}</td>
+                    <td>{{ entry.date }}</td>
+                    {% elif report_type in booking_reports %}
+                    <td>{{ entry.booking_id }}</td>
+                    <td>{{ entry.customer_id.customer_name }}</td>
+                    <td>{{ entry.session_id.trainer_id.trainer_name }}</td>
+                    <td>{{ entry.booking_date }}</td>
+                    <td>{{ entry.session_id.time_slot }}</td>
+                    {% endif %}
+                </tr>
+                {% empty %}
+                {% with total_columns=6 %}
+                <tr>
+                    <td colspan="{{ total_columns }}" class="text-center">No records found.</td>
+                </tr>
+                {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="footer">
+            <p>© 2025 F Company. All rights reserved.</p>
+        </div>
+    </div>
+
+    
+
+    <script>
+        function printReport() {
+            window.print();
+        }
+    </script>
+</body>
+</html>

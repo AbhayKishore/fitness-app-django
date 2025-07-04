@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Report</title>
+    <link href="https://cdn.prod.website-files.com/67965768eaf7bb15225ae478/67965768eaf7bb15225ae607_Favcon.png" rel="shortcut icon" type="image/x-icon"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.datatables.net/1.12.1/css/jquery.dataTables.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #203492;
+            --primary-light: #3a4ca8;
+            --secondary: #28a745;
+            --accent: #ff6b6b;
+            --light-bg: #f8faff;
+            --dark-text: #2d3748;
+            --light-text: #718096;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+            display: flex;
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Sidebar styles */
+        .sidebar {
+            width: 72px;
+            height: 100vh;
+            background-color: var(--white);
+            position: fixed;
+            left: 0;
+            top: 0;
+            display: flex;
+            flex-direction: column;
+            padding-top: 12px;
+            transition: var(--transition);
+            overflow-y: auto;
+            box-shadow: var(--shadow-sm);
+            z-index: 1000;
+        }
+        
+        .sidebar.expanded {
+            width: 240px;
+            padding-left: 12px;
+        }
+        
+        .sidebar-item {
+            width: calc(100% - 24px);
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 4px 12px;
+            text-decoration: none;
+            color: var(--dark-text);
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        
+        .sidebar-item:hover {
+            background-color: rgba(32, 52, 146, 0.1);
+        }
+        
+        .sidebar-item.active {
+            background-color: rgba(32, 52, 146, 0.1);
+            color: var(--primary);
+            font-weight: 600;
+        }
+        
+        .sidebar-item.active .sidebar-icon {
+            color: var(--primary);
+        }
+        
+        .sidebar-icon {
+            font-size: 20px;
+            width: 24px;
+            text-align: center;
+            margin-right: 24px;
+            flex-shrink: 0;
+            color: var(--light-text);
+            transition: var(--transition);
+        }
+        
+        .sidebar-text {
+            display: none;
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .sidebar.expanded .sidebar-text {
+            display: inline-block;
+        }
+        
+        .menu-toggle {
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            color: var(--dark-text);
+            border-radius: 8px;
+            margin: 0 12px 12px;
+            transition: var(--transition);
+            white-space: nowrap;
+        }
+        
+        .menu-toggle:hover {
+            background-color: rgba(32, 52, 146, 0.1);
+        }
+        
+        .menu-toggle .sidebar-icon {
+            margin-right: 0;
+        }
+        
+        .sidebar.expanded .menu-toggle .sidebar-icon {
+            margin-right: 24px;
+        }
+        
+        .main-content {
+            margin-left: 72px;
+            flex-grow: 1;
+            transition: var(--transition);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .main-content.expanded {
+            margin-left: 240px;
+        }
+
+        /* Navbar styles */
+        .navbar {
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+            padding: 0.8rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .navbar-brand {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .nav-link {
+            color: var(--dark-text);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            margin: 0 0.2rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            color: var(--white);
+            background-color: var(--primary);
+        }
+        
+        .nav-link.logout {
+            color: var(--accent);
+            background-color: rgba(255, 107, 107, 0.1);
+        }
+        
+        .nav-link.logout:hover {
+            color: var(--white);
+            background-color: var(--accent);
+        }
+
+        /* Content styles */
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+            flex-grow: 1;
+        }
+        
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-container {
+            margin-top: 30px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+            color: var(--dark-text);
+        }
+        
+        .form-control {
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(0,0,0,0.1);
+            transition: var(--transition);
+            width: 100%;
+        }
+        
+        .form-control:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 0.25rem rgba(32, 52, 146, 0.25);
+        }
+        
+        select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23718096' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M2 5l6 6 6-6'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 0.75rem center;
+            background-size: 16px 12px;
+        }
+        
+        .btn-primary {
+            background-color: var(--primary);
+            border-color: var(--primary);
+            padding: 10px 20px;
+            font-weight: 500;
+            border-radius: 8px;
+            transition: var(--transition);
+        }
+        
+        .btn-primary:hover {
+            background-color: var(--primary-light);
+            border-color: var(--primary-light);
+        }
+        
+        .optgroup-label {
+            font-weight: 600;
+            color: var(--primary);
+            padding: 5px 0;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+                margin: 15px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .main-content {
+                margin-left: 0;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+                z-index: 1050;
+            }
+            
+            .sidebar.expanded {
+                transform: translateX(0);
+                width: 240px;
+            }
+            
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% csrf_token %}
+    
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="menu-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars sidebar-icon"></i>
+            <span class="sidebar-text">Menu</span>
+        </div>
+        
+        <a href="/Admin/Trainer_Cat" class="sidebar-item">
+            <i class="fas fa-medal sidebar-icon"></i>
+            <span class="sidebar-text">Trainer Categories</span>
+        </a>
+        
+        <a href="/Admin/Trainer" class="sidebar-item">
+            <i class="fas fa-user-tie sidebar-icon"></i>
+            <span class="sidebar-text">Trainers</span>
+        </a>
+        
+        <a href="/Admin/Exercise" class="sidebar-item">
+            <i class="fas fa-running sidebar-icon"></i>
+            <span class="sidebar-text">Exercises</span>
+        </a>
+        
+        <a href="/Admin/Session" class="sidebar-item">
+            <i class="fas fa-calendar-check sidebar-icon"></i>
+            <span class="sidebar-text">Sessions</span>
+        </a>
+        
+        <a href="/Admin/Customer" class="sidebar-item">
+            <i class="fas fa-users sidebar-icon"></i>
+            <span class="sidebar-text">Customers</span>
+        </a>
+        
+        <a href="/Admin/Assessment" class="sidebar-item">
+            <i class="fas fa-heartbeat sidebar-icon"></i>
+            <span class="sidebar-text">Fitness Assessment</span>
+        </a>
+        
+        <a href="/Admin/Booking" class="sidebar-item">
+            <i class="fas fa-calendar-alt sidebar-icon"></i>
+            <span class="sidebar-text">Bookings</span>
+        </a>
+        
+        <a href="/Admin/Records" class="sidebar-item">
+            <i class="fas fa-chart-line sidebar-icon"></i>
+            <span class="sidebar-text">Fitness Records</span>
+        </a>
+        
+        <a href="/Admin/Analytics" class="sidebar-item">
+            <i class="fas fa-chart-pie sidebar-icon"></i>
+            <span class="sidebar-text">Analytics</span>
+        </a>
+
+        <a href="/Admin/Report" class="sidebar-item active" >
+            <i class="fas fa-file-alt sidebar-icon"></i>
+            <span class="sidebar-text">All Reports</span>
+        </a>
+        
+        <a href="/Admin/AD_Bills" class="sidebar-item">
+            <i class="fas fa-file-invoice-dollar sidebar-icon"></i>
+            <span class="sidebar-text">All Bills</span>
+        </a>
+    </div>
+    
+    <div class="main-content" id="mainContent">
+        <!-- Navbar -->
+        <nav class="navbar">
+            <a class="navbar-brand" href="/Admin/Dashboard">
+                <i class="fas fa-dumbbell"></i>
+                Virtual Fitness
+            </a>
+            <div>
+                <a class="nav-link logout" href="/Home/Logout">
+                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                </a>
+            </div>
+        </nav>
+
+        <div class="container">
+            <h1>Generate Reports</h1>
+            
+            <div class="form-container">
+                <form action="{% url 'Print_report' %}" method="GET">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="reportType">Select Report Type:</label>
+                        <select name="reportType" id="reportType" class="form-control" required>
+                            <optgroup label="Customer Reports" class="optgroup-label">
+                                <option value="all_customers">All Customers</option>
+                                <option value="active_customers">Active Customers</option>
+                                <option value="inactive_customers">Inactive Customers</option>
+                                <option value="customers_by_category">Customers by Category</option>
+                                <option value="customers_by_date">Customers Joined in Date Range</option>
+                            </optgroup>
+                            <optgroup label="Trainer Reports" class="optgroup-label">
+                                <option value="all_trainers">All Trainers</option>
+                                <option value="active_trainers">Active Trainers</option>
+                                <option value="inactive_trainers">Inactive Trainers</option>
+                                <option value="trainers_by_category">Trainers by Category</option>
+                            </optgroup>
+                            <optgroup label="Payment Reports" class="optgroup-label">
+                                <option value="all_payments">All Payments</option>
+                                <option value="payments_by_customer">Payments by Customer</option>
+                            </optgroup>
+                            <optgroup label="Booking Reports" class="optgroup-label">
+                                <option value="booking_all">All Bookings</option>
+                                <option value="booking_trainer">Bookings by Trainer</option>
+                                <option value="booking_customer">Bookings by Customer</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="categoryDiv" style="display: none;">
+                        <label for="category">Select Category:</label>
+                        <select name="category" id="category" class="form-control">
+                            <option value="">-- Select Category --</option>
+                            {% for cat in categories %}
+                            <option value="{{ cat.cat_id }}">{{ cat.category_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="trainerDiv" style="display: none;">
+                        <label for="trainer">Select Trainer:</label>
+                        <select name="trainer" id="trainer" class="form-control">
+                            <option value="">-- Select Trainer --</option>
+                            {% for trainer in trainers %}
+                            <option value="{{ trainer.trainer_id }}">{{ trainer.trainer_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="customerDiv" style="display: none;">
+                        <label for="customer">Select Customer:</label>
+                        <select name="customer" id="customer" class="form-control">
+                            <option value="">-- Select Customer --</option>
+                            {% for cust in customers %}
+                            <option value="{{ cust.customer_id }}">{{ cust.customer_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="form-group" id="startDateDiv" style="display: none;">
+                        <label for="startDate">Start Date:</label>
+                        <input type="date" name="startDate" id="startDate" class="form-control">
+                    </div>
+                    
+                    <div class="form-group" id="endDateDiv" style="display: none;">
+                        <label for="endDate">End Date:</label>
+                        <input type="date" name="endDate" id="endDate" class="form-control">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary mt-4">Generate PDF</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+
+    <script>
+        // Sidebar functionality
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            sidebar.classList.toggle('expanded');
+            if (mainContent) mainContent.classList.toggle('expanded');
+            
+            // Save state
+            const isExpanded = sidebar.classList.contains('expanded');
+            localStorage.setItem('sidebarExpanded', isExpanded);
+        }
+        
+        // Initialize sidebar state
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            
+            // Load saved state
+            const savedState = localStorage.getItem('sidebarExpanded');
+            if (savedState === 'true') {
+                sidebar.classList.add('expanded');
+                if (mainContent) mainContent.classList.add('expanded');
+            }
+
+            // Close sidebar when clicking outside on mobile
+            if (window.innerWidth <= 576) {
+                document.addEventListener('click', function(e) {
+                    if (!sidebar.contains(e.target) && !e.target.classList.contains('menu-toggle')) {
+                        sidebar.classList.remove('expanded');
+                        if (mainContent) mainContent.classList.remove('expanded');
+                        localStorage.setItem('sidebarExpanded', 'false');
+                    }
+                });
+            }
+
+            // Report type selection logic
+            const reportType = document.getElementById("reportType");
+            const categoryDiv = document.getElementById("categoryDiv");
+            const trainerDiv = document.getElementById("trainerDiv");
+            const customerDiv = document.getElementById("customerDiv");
+            const startDateDiv = document.getElementById("startDateDiv");
+            const endDateDiv = document.getElementById("endDateDiv");
+
+            // Define report types that require a date range
+            const dateReports = [
+                "customers_by_date",
+                "all_payments",
+                "payments_by_customer",
+                "booking_all",
+                "booking_trainer",
+                "booking_customer"
+            ];
+
+            // Define report types that require specific dropdowns
+            const categoryReports = ["customers_by_category", "trainers_by_category"];
+            const trainerReports = ["booking_trainer"];
+            const customerReports = ["payments_by_customer", "booking_customer"];
+
+            function updateVisibility() {
+                const selected = reportType.value;
+
+                // Toggle date fields
+                const showDates = dateReports.includes(selected);
+                startDateDiv.style.display = showDates ? "block" : "none";
+                endDateDiv.style.display = showDates ? "block" : "none";
+
+                // Toggle dropdowns
+                categoryDiv.style.display = categoryReports.includes(selected) ? "block" : "none";
+                trainerDiv.style.display = trainerReports.includes(selected) ? "block" : "none";
+                customerDiv.style.display = customerReports.includes(selected) ? "block" : "none";
+            }
+
+            // Initial run
+            updateVisibility();
+
+            // Update on selection change
+            reportType.addEventListener("change", updateVisibility);
+        });
+    </script>
+</body>
+</html>

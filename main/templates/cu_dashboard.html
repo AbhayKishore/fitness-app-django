@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Dashboard | Virtual Fitness Companion</title>
+    <link href="https://cdn.prod.website-files.com/67965768eaf7bb15225ae478/67965768eaf7bb15225ae607_Favcon.png" rel="shortcut icon" type="image/x-icon" />
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Font Awesome CSS for icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary: #203492;
+            --primary-light: #3a4ca8;
+            --secondary: #28a745;
+            --accent: #ff6b6b;
+            --light-bg: #f8faff;
+            --dark-text: #2d3748;
+            --light-text: #718096;
+            --white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+            --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+            --transition: all 0.3s ease;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light-bg);
+            color: var(--dark-text);
+            line-height: 1.6;
+        }
+
+        .navbar {
+            background-color: var(--white);
+            box-shadow: var(--shadow-sm);
+            padding: 0.8rem 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 600;
+            color: var(--primary);
+            font-size: 1.3rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .navbar-brand i {
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+
+        .nav-link {
+            color: var(--dark-text);
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            margin: 0 0.2rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--white);
+            background-color: var(--primary);
+        }
+
+        .nav-link.logout {
+            color: var(--accent);
+            background-color: rgba(255, 107, 107, 0.1);
+        }
+
+        .nav-link.logout:hover {
+            color: var(--white);
+            background-color: var(--accent);
+        }
+
+        .dashboard-header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-top: 1.5rem;
+        }
+
+        .dashboard-header h1 {
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+
+        .dashboard-header p {
+            color: var(--light-text);
+            max-width: 700px;
+            margin: 0 auto;
+            font-size: 1.1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            padding: 1rem 0;
+        }
+
+        .dashboard-card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 2rem 1.5rem;
+            text-align: center;
+            box-shadow: var(--shadow-sm);
+            transition: var(--transition);
+            border: 1px solid rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary-light);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(32, 52, 146, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            font-size: 1.5rem;
+            transition: var(--transition);
+        }
+
+        .dashboard-card:hover .card-icon {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .card-title {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--dark-text);
+        }
+
+        .card-link {
+            margin-top: auto;
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background-color: var(--primary);
+            color: var(--white);
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .card-link:hover {
+            background-color: var(--primary-light);
+            color: var(--white);
+        }
+
+        .container-fluid {
+            max-width: 1400px;
+            padding: 0 2rem;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 0.8rem 1rem;
+            }
+            
+            .container-fluid {
+                padding: 0 1rem;
+            }
+            
+            .dashboard-header {
+                margin-bottom: 2rem;
+            }
+            
+            .dashboard-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard-header p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-dumbbell"></i>
+                Virtual Fitness
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/Cust/CU_Bills">Past Bills</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a class="nav-link logout" href="/Home/Logout">
+                            <i class="fas fa-sign-out-alt me-1"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="dashboard-header">
+            <h1>Welcome to Your Fitness Dashboard</h1>
+            <p>Manage your fitness journey, track progress, book sessions, and access personalized plans all in one place.</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-medal"></i>
+                </div>
+                <h3 class="card-title">Trainer Categories</h3>
+                <p>Find trainers by specialty</p>
+                <a href="/Cust/Trainer_Cat" class="card-link">Explore</a>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-user-tie"></i>
+                </div>
+                <h3 class="card-title">Trainers</h3>
+                <p>Browse professional trainers</p>
+                <a href="/Cust/Trainer" class="card-link">View All</a>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-running"></i>
+                </div>
+                <h3 class="card-title">Exercise Plans</h3>
+                <p>Custom workout routines</p>
+                <a href="/Cust/Exercise" class="card-link">Get Plans</a>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h3 class="card-title">Diet Plans</h3>
+                <p>Nutritional guidance</p>
+                <a href="/Cust/Diet" class="card-link">View Diets</a>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-calendar-check"></i>
+                </div>
+                <h3 class="card-title">Sessions</h3>
+                <p>Schedule your workouts</p>
+                <a href="/Cust/Session" class="card-link">Manage</a>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3 class="card-title">Profile</h3>
+                <p>Update your information</p>
+                <a href="/Cust/Customer" class="card-link">Settings</a>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <h3 class="card-title">Fitness Assessment</h3>
+                <p>Track your metrics</p>
+                <a href="/Cust/Assessment" class="card-link">View</a>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <h3 class="card-title">Bookings</h3>
+                <p>Your scheduled sessions</p>
+                <a href="/Cust/Booking" class="card-link">Manage</a>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h3 class="card-title">Fitness Records</h3>
+                <p>Your progress history</p>
+                <a href="/Cust/Records" class="card-link">View</a>
+            </div>
+            
+            <div class="dashboard-card">
+                <div class="card-icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <h3 class="card-title">Analytics</h3>
+                <p>Performance insights</p>
+                <a href="/Cust/Analytics" class="card-link">View</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

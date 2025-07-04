@@ -1,0 +1,224 @@
+/* sidebar.css */
+.sidebar {
+  width: 72px;
+  height: 100vh;
+  background-color: var(--white);
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 12px;
+  transition: var(--transition);
+  overflow-y: auto; /* Make scrollable if content exceeds viewport */
+  box-shadow: var(--shadow-sm);
+  z-index: 1000;
+}
+
+.sidebar.expanded {
+  width: 240px;
+  padding-left: 12px;
+}
+
+.sidebar-item {
+  width: calc(100% - 24px);
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 4px 12px;
+  text-decoration: none;
+  color: var(--dark-text);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.sidebar-item:hover {
+  background-color: rgba(32, 52, 146, 0.1);
+}
+
+.sidebar-item.active {
+  background-color: rgba(32, 52, 146, 0.1);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.sidebar-item.active .sidebar-icon {
+  color: var(--primary);
+}
+
+.sidebar-icon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+  margin-right: 24px;
+  flex-shrink: 0;
+  color: var(--light-text);
+  transition: var(--transition);
+}
+
+.sidebar-text {
+  display: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sidebar.expanded .sidebar-text {
+  display: block;
+}
+
+.menu-toggle {
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: var(--dark-text);
+  border-radius: 8px;
+  margin: 0 12px 12px;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.menu-toggle:hover {
+  background-color: rgba(32, 52, 146, 0.1);
+}
+
+.menu-toggle .sidebar-icon {
+  margin-right: 0;
+}
+
+.sidebar.expanded .menu-toggle .sidebar-icon {
+  margin-right: 24px;
+}
+:root {
+  --primary: #203492;
+  --primary-light: #3a4ca8;
+  --secondary: #28a745;
+  --accent: #ff6b6b;
+  --light-bg: #f8faff;
+  --dark-text: #2d3748;
+  --light-text: #718096;
+  --white: #ffffff;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.12);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+  --shadow-lg: 0 10px 15px rgba(0,0,0,0.1);
+  --transition: all 0.3s ease;
+}
+
+.sidebar {
+  width: 72px;
+  height: 100vh;
+  background-color: var(--white);
+  position: fixed;
+  left: 0;
+  top: 0;
+  display: flex;
+  flex-direction: column;
+  padding-top: 12px;
+  transition: var(--transition);
+  overflow-y: auto;
+  box-shadow: var(--shadow-sm);
+  z-index: 1000;
+}
+
+.sidebar.expanded {
+  width: 240px;
+  padding-left: 12px;
+}
+
+.sidebar-item {
+  width: calc(100% - 24px);
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  margin: 4px 12px;
+  text-decoration: none;
+  color: var(--dark-text);
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.sidebar-item:hover {
+  background-color: rgba(32, 52, 146, 0.1);
+}
+
+.sidebar-item.active {
+  background-color: rgba(32, 52, 146, 0.1);
+  color: var(--primary);
+  font-weight: 500;
+}
+
+.sidebar-item.active .sidebar-icon {
+  color: var(--primary);
+}
+
+.sidebar-icon {
+  font-size: 20px;
+  width: 24px;
+  text-align: center;
+  margin-right: 24px;
+  flex-shrink: 0;
+  color: var(--light-text);
+  transition: var(--transition);
+}
+
+.sidebar-text {
+  display: none;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.sidebar.expanded .sidebar-text {
+  display: inline-block;
+}
+
+.menu-toggle {
+  padding: 12px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  color: var(--dark-text);
+  border-radius: 8px;
+  margin: 0 12px 12px;
+  transition: var(--transition);
+  white-space: nowrap;
+}
+
+.menu-toggle:hover {
+  background-color: rgba(32, 52, 146, 0.1);
+}
+
+.menu-toggle .sidebar-icon {
+  margin-right: 0;
+}
+
+.sidebar.expanded .menu-toggle .sidebar-icon {
+  margin-right: 24px;
+}
+
+.main-content {
+  margin-left: 72px;
+  transition: var(--transition);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-content.expanded {
+  margin-left: 240px;
+}
+
+/* Ensure Font Awesome is loaded */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css');
+
+/* Ensure sidebar doesn't exceed viewport height */
+@media (max-height: 800px) {
+  .sidebar {
+    overflow-y: auto;
+  }
+}

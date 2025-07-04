@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link
+    href="https://cdn.prod.website-files.com/67965768eaf7bb15225ae478/67965768eaf7bb15225ae607_Favcon.png"
+    rel="shortcut icon"
+    type="image/x-icon"
+  />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-image: url('https://content.rsggroup.com/image/upload/q_auto,f_auto/v1620635033/GoldsGym/Studio%20Berlin/210310_GOLDSGYM_Interior_0463.jpg');
+            background-size: cover;
+            background-position: center;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 0;
+        }
+
+        .card {
+            background-color: rgba(255, 255, 255, 0.8);  /* Slight transparency */
+        }
+    </style>
+</head>
+<body>
+    <div class="container d-flex justify-content-center align-items-center vh-100">
+        <div class="card p-4 shadow" style="width: 350px;">
+            <h3 class="text-center">Login</h3>
+
+            <!-- Flash Messages for Errors -->
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="alert alert-danger text-center">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+
+            <form method="POST" action="{% url 'Login' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" class="form-control" id="username" name="username" placeholder="Enter your username" required>
+                </div>
+                <div class="mb-3">
+                    <label for="password" class="form-label">Password</label>
+                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required>
+                </div>
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </div>
+            </form>
+
+            <div class="text-center mt-3">
+                <a href="/Home/Register/">Register</a> | <a href="/Home/Forgot_Password/">Forgot Password?</a> | <a href="/Home/">Home</a>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
